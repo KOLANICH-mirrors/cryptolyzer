@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from cryptoparser.common.algorithm import Authentication
-
-from cryptoparser.tls.ciphersuite import TlsCipherSuite
-from cryptoparser.tls.extension import TlsExtensionServerName, TlsNamedCurve, TlsExtensionEllipticCurves
 from cryptoparser.tls.extension import TlsSignatureAndHashAlgorithm, TlsExtensionSignatureAlgorithms
-from cryptoparser.tls.extension import TlsECPointFormat, TlsExtensionECPointFormats
-from cryptoparser.tls.subprotocol import TlsCipherSuiteVector, TlsAlertDescription, TlsHandshakeClientHello
+from cryptoparser.tls.subprotocol import TlsAlertDescription
 
 from cryptolyzer.common.analyzer import AnalyzerTlsBase
 from cryptolyzer.common.exception import NetworkError
 from cryptolyzer.common.result import AnalyzerResultTls, AnalyzerTargetTls
-from cryptolyzer.tls.client import TlsAlert
+from cryptolyzer.tls.client import (
+    TlsAlert,
+    TlsHandshakeClientHelloAuthenticationECDSA,
+    TlsHandshakeClientHelloAuthenticationDSS,
+    TlsHandshakeClientHelloAuthenticationRSA,
+)
 
 
 class AnalyzerResultSigAlgos(AnalyzerResultTls):
@@ -33,28 +33,21 @@ class AnalyzerSigAlgos(AnalyzerTlsBase):
 
     def analyze(self, l7_client, protocol_version):
         supported_algorithms = []
-        for authentication in [Authentication.DSS, Authentication.RSA, Authentication.ECDSA]:
-            cipher_suites = TlsCipherSuiteVector([
-                cipher_suite
-                for cipher_suite in TlsCipherSuite
-                if (cipher_suite.value.key_exchange and cipher_suite.value.key_exchange.value.pfs and
-                    cipher_suite.value.authentication and cipher_suite.value.authentication == authentication)
-            ])
+        client_hellos = [
+            TlsHandshakeClientHelloAuthenticationDSS(l7_client.address),
+            TlsHandshakeClientHelloAuthenticationECDSA(l7_client.address),
+            TlsHandshakeClientHelloAuthenticationRSA(l7_client.address),
+        ]
+        for client_hello in client_hellos:
+            authentication = client_hello.cipher_suites[0].value.authentication
 
             for algorithm in TlsSignatureAndHashAlgorithm:
                 if algorithm.value.signature_algorithm != authentication:
                     continue
 
-                client_hello = TlsHandshakeClientHello(
-                    protocol_version=protocol_version,
-                    cipher_suites=cipher_suites,
-                    extensions=[
-                        TlsExtensionServerName(l7_client.address),
-                        TlsExtensionECPointFormats(list(TlsECPointFormat)),
-                        TlsExtensionEllipticCurves(list(TlsNamedCurve)),
-                        TlsExtensionSignatureAlgorithms([algorithm, ]),
-                    ]
-                )
+                for extension in client_hello.extensions:
+                    if isinstance(extension, TlsExtensionSignatureAlgorithms):
+                        extension = TlsExtensionSignatureAlgorithms([algorithm, ])
 
                 try:
                     l7_client.do_tls_handshake(client_hello)
@@ -66,8 +59,6 @@ class AnalyzerSigAlgos(AnalyzerTlsBase):
                     pass
                 else:
                     supported_algorithms.append(algorithm)
-                finally:
-                    del client_hello.extensions[-1]
 
         return AnalyzerResultSigAlgos(
             AnalyzerTargetTls.from_l7_client(l7_client, protocol_version),

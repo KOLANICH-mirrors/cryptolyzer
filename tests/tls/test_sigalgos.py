@@ -21,9 +21,21 @@ class TestTlsSigAlgos(unittest.TestCase):
     def test_sigalgos(self):
         result = self.get_result('ecc256.badssl.com', 443)
         self.assertEqual(result.sig_algos, [
+            TlsSignatureAndHashAlgorithm.ECDSA_NONE,
+            TlsSignatureAndHashAlgorithm.ECDSA_MD5,
             TlsSignatureAndHashAlgorithm.ECDSA_SHA1,
             TlsSignatureAndHashAlgorithm.ECDSA_SHA224,
             TlsSignatureAndHashAlgorithm.ECDSA_SHA256,
             TlsSignatureAndHashAlgorithm.ECDSA_SHA384,
             TlsSignatureAndHashAlgorithm.ECDSA_SHA512,
+        ])
+        result = self.get_result('rsa2048.badssl.com', 443)
+        self.assertEqual(result.sig_algos, [
+            TlsSignatureAndHashAlgorithm.RSA_NONE,
+            TlsSignatureAndHashAlgorithm.RSA_MD5,
+            TlsSignatureAndHashAlgorithm.RSA_SHA1,
+            TlsSignatureAndHashAlgorithm.RSA_SHA224,
+            TlsSignatureAndHashAlgorithm.RSA_SHA256,
+            TlsSignatureAndHashAlgorithm.RSA_SHA384,
+            TlsSignatureAndHashAlgorithm.RSA_SHA512,
         ])

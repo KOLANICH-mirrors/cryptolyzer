@@ -60,28 +60,50 @@ class TlsHandshakeClientHelloAuthenticationBase(TlsHandshakeClientHello):
 
 
 class TlsHandshakeClientHelloAuthenticationRSA(TlsHandshakeClientHelloAuthenticationBase):
+    _SIGNATURE_ALGORITHMS = [
+        signature_and_hash_algorithm
+        for signature_and_hash_algorithm in TlsSignatureAndHashAlgorithm
+        if signature_and_hash_algorithm.value.signature_algorithm == Authentication.RSA
+    ]
+
     def __init__(self, hostname):
         super(TlsHandshakeClientHelloAuthenticationRSA, self).__init__(hostname, Authentication.RSA)
 
         self.extensions.extend([
-            TlsExtensionSignatureAlgorithms(list(TlsSignatureAndHashAlgorithm)),
+            TlsExtensionSignatureAlgorithms(self._SIGNATURE_ALGORITHMS),
             TlsExtensionEllipticCurves(list(TlsNamedCurve)),
         ])
 
 
 class TlsHandshakeClientHelloAuthenticationDSS(TlsHandshakeClientHelloAuthenticationBase):
+    _SIGNATURE_ALGORITHMS = [
+        signature_and_hash_algorithm
+        for signature_and_hash_algorithm in TlsSignatureAndHashAlgorithm
+        if signature_and_hash_algorithm.value.signature_algorithm == Authentication.DSS
+    ]
+
     def __init__(self, hostname):
         super(TlsHandshakeClientHelloAuthenticationDSS, self).__init__(hostname, Authentication.DSS)
 
+        self.extensions.extend([
+            TlsExtensionSignatureAlgorithms(self._SIGNATURE_ALGORITHMS),
+        ])
+
 
 class TlsHandshakeClientHelloAuthenticationECDSA(TlsHandshakeClientHelloAuthenticationBase):
+    _SIGNATURE_ALGORITHMS = [
+        signature_and_hash_algorithm
+        for signature_and_hash_algorithm in TlsSignatureAndHashAlgorithm
+        if signature_and_hash_algorithm.value.signature_algorithm == Authentication.ECDSA
+    ]
+
     def __init__(self, hostname):
         super(TlsHandshakeClientHelloAuthenticationECDSA, self).__init__(hostname, Authentication.ECDSA)
 
         self.extensions.extend([
             TlsExtensionECPointFormats(list(TlsECPointFormat)),
             TlsExtensionEllipticCurves(list(TlsNamedCurve)),
-            TlsExtensionSignatureAlgorithms(list(TlsSignatureAndHashAlgorithm)),
+            TlsExtensionSignatureAlgorithms(self._SIGNATURE_ALGORITHMS),
         ])
 
 
