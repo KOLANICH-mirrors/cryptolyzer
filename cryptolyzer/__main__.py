@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
+import sys
+
 import argparse
 import urllib3
 
@@ -11,6 +14,19 @@ from cryptolyzer.common.exception import NetworkError, SecurityError
 from cryptolyzer.common.result import AnalyzerResultError
 
 from cryptolyzer import __setup__
+
+
+def setup_logger(arguments):
+    if arguments.log_level == 'none':
+        return
+
+    logger = logging.getLogger()
+
+    handler = logging.StreamHandler(sys.stderr)
+    logger.setLevel(getattr(logging, arguments.log_level.upper()))
+    formatter = logging.Formatter('%(asctime)s (%(levelname)s): %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
 def get_protocol_handler_analyzer_and_uris(parser, arguments):
@@ -43,6 +59,12 @@ def get_argument_parser():
     parser = argparse.ArgumentParser(prog='cryptolyze')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s ' + __setup__.__version__)
     parser.add_argument(
+        '--log-level',
+        choices=['debug', 'info', 'warning', 'error', 'critical', 'none'],
+        default='none',
+        help='Sets the threshold for this logger to level (default: %(default)s)'
+    )
+    parser.add_argument(
         '--output-format',
         choices=['json', 'markdown'],
         default='markdown',
@@ -72,6 +94,7 @@ def get_argument_parser():
 def main():
     parser = get_argument_parser()
     arguments = parser.parse_args()
+    setup_logger(arguments)
     protocol_handler, analyzer, targets = get_protocol_handler_analyzer_and_uris(parser, arguments)
 
     for target in targets:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import copy
+import logging
 import time
 import attr
 
@@ -124,6 +124,10 @@ class AnalyzerCipherSuites(AnalyzerTlsBase):
                     break
 
                 return [], remaining_cipher_suites
+
+            logging.info('Server selected cipher suite; version="{}", name="{}"'.format(
+                protocol_version.identifier, accepted_cipher_suites[-1].name)
+            )
 
         return accepted_cipher_suites, remaining_cipher_suites
 

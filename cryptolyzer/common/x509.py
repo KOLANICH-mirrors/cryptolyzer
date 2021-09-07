@@ -204,6 +204,10 @@ class PublicKeyX509(PublicKey):
         return False
 
     @property
+    def serial_number(self):
+        return self.certificate.serial_number
+
+    @property
     def subject(self):
         return self.certificate.subject.native
 
@@ -260,7 +264,7 @@ class PublicKeyX509(PublicKey):
 
     def _asdict(self):
         return OrderedDict([
-            ('serial_number', str(self.certificate.serial_number)),
+            ('serial_number', self.serial_number),
             ('subject', self.subject),
             ('subject_alternative_names', sorted(self.subject_alternative_names)),
             ('issuer', self.issuer),

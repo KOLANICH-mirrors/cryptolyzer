@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
+import logging
 
 import attr
 
@@ -218,6 +219,12 @@ class AnalyzerPublicKeys(AnalyzerTlsBase):
                         tls_public_key_params['certificate_status'] = certificate_status
 
             results.append(TlsPublicKey(**tls_public_key_params))
+            logging.info('Server selected public key; sni_sent="{}" type="{}" issuer="{}" serial="{}"'.format(
+                sni_sent,
+                results[-1].tls_certificate_chain.items[0].key_type.name,
+                results[-1].tls_certificate_chain.items[0].issuer['organization_name'],
+                results[-1].tls_certificate_chain.items[0].serial_number,
+            ))
 
     @staticmethod
     def _get_server_messages(l7_client, client_hello, sni_sent, client_hello_messages):

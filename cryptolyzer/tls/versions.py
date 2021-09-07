@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import attr
 
 from cryptoparser.tls.ciphersuite import TlsCipherSuite
@@ -8,6 +10,7 @@ from cryptoparser.tls.subprotocol import TlsHandshakeType, TlsAlertDescription
 from cryptoparser.tls.subprotocol import SslMessageType, SslErrorType
 from cryptoparser.tls.version import (
     SslProtocolVersion,
+    SslVersion,
     TlsProtocolVersionBase,
     TlsProtocolVersionDraft,
     TlsProtocolVersionFinal,
@@ -65,6 +68,7 @@ class AnalyzerVersions(AnalyzerTlsBase):
             pass
         else:
             if server_messages[SslMessageType.SERVER_HELLO].cipher_kinds:
+                logging.info('Server accepted SSL/TLS version; version="{}"'.format(SslVersion.SSL2.identifier))
                 return True
 
         return False
@@ -121,6 +125,9 @@ class AnalyzerVersions(AnalyzerTlsBase):
                     break
                 else:
                     if protocol_version == server_hello.protocol_version:
+                        logging.info('Server accepted SSL/TLS version; version="{}"'.format(
+                            protocol_version.identifier)
+                        )
                         supported_protocols.append(server_hello.protocol_version)
 
                     break
@@ -137,6 +144,7 @@ class AnalyzerVersions(AnalyzerTlsBase):
             TlsExtensionType.SUPPORTED_VERSIONS
         ).selected_version
         supported_protocols.append(selected_version)
+        logging.info('Server accepted SSL/TLS version; version="{}"'.format(selected_version.identifier))
         while checkable_protocols and checkable_protocols[0] >= selected_version:
             del checkable_protocols[0]
 

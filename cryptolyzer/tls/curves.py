@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
+import logging
 
 import six
 
@@ -132,6 +133,7 @@ class AnalyzerCurves(AnalyzerTlsBase):
                 ).elliptic_curves
 
             supported_curve = self._get_supported_curve(protocol_version, server_key_exchange)
+            logging.info('Server selected curve; name="{}"'.format(supported_curve.name))
 
             try:
                 checkable_curves.remove(supported_curve)

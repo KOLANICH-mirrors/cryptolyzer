@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import attr
 
 from cryptoparser.tls.extension import TlsExtensionSignatureAlgorithms, TlsSignatureAndHashAlgorithmVector
@@ -63,6 +65,7 @@ class AnalyzerSigAlgos(AnalyzerTlsBase):
                 break
             else:
                 supported_algorithms.append(algorithm)
+                logging.info('Server selected signature algorithm; name="{}"'.format(algorithm.name))
 
         return supported_algorithms
 
