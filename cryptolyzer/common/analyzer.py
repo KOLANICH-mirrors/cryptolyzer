@@ -95,8 +95,10 @@ class ProtocolHandlerBase(object):
 
         raise NotImplementedError()
 
-    def analyze(self, analyzer, uri):
+    def analyze(self, analyzer, uri, timeout=None):
         l7_client = self._l7_client_from_uri(uri)
+        if timeout is not None:
+            l7_client.timeout = timeout
         args, kwargs = self._get_analyzer_args()
         return analyzer.analyze(l7_client, *args, **kwargs)
 

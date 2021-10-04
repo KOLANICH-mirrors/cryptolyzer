@@ -66,9 +66,9 @@ class ProtocolHandlerSshAllSupportedVersions(ProtocolHandlerSshBase):
     def get_protocol(cls):
         return 'ssh'
 
-    def analyze(self, analyzer, uri):
+    def analyze(self, analyzer, uri, timeout=None):
         base_analyze = super(ProtocolHandlerSshAllSupportedVersions, self).analyze
-        analyzer_result = base_analyze(AnalyzerVersions(), uri)
+        analyzer_result = base_analyze(AnalyzerVersions(), uri, timeout)
         if isinstance(analyzer, AnalyzerVersions):
             return analyzer_result
 
