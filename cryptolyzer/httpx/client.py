@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import abc
+import warnings
+
 import urllib3
 
 import attr
@@ -104,4 +106,8 @@ class HttpClientHandshake(HttpHandshakeBase):
 
 
 class HttpsClientHandshake(HttpHandshakeBase):
-    pass
+    def _get_connection_extra_args(self):
+        return {'assert_hostname': False, 'cert_reqs': 'CERT_NONE'}
+
+    def _ignore_warnings(self):
+        warnings.simplefilter('ignore', urllib3.exceptions.InsecureRequestWarning)
