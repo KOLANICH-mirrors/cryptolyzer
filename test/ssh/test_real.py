@@ -43,7 +43,7 @@ class TestReal(unittest.TestCase):
     def test_versions(self):
         result = test.ssh.test_versions.TestSshVersions.get_result('github.com')
         self.assertEqual(result.protocol_versions, [SshProtocolVersion(SshVersion.SSH2)])
-        self.assertEqual(result.software_version, SshSoftwareVersionUnparsed('babeld-17a926d7'))
+        self.assertEqual(result.software_version, SshSoftwareVersionUnparsed('babeld-b6e6da7b'))
 
         result = test.ssh.test_versions.TestSshVersions.get_result('gitlab.com')
         self.assertEqual(result.protocol_versions, [SshProtocolVersion(SshVersion.SSH2)])
